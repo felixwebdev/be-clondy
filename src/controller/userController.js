@@ -1,0 +1,97 @@
+import User from "../models/User.js";
+import userService from "../service/UserService.js";
+import VerificationService from "../service/VerificationService.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import AppError from "../utils/AppError.js";
+
+class UserController {
+  index(req, res) {
+    res.send("Index router User");
+  }
+
+  async register(req, res, next) {
+    try {
+      const result = await userService.register(req.body);
+      return ApiResponse.success(res, result);
+    } catch (err) {
+      next(err); 
+    }
+  }
+
+  async login(req, res, next) {
+    try {
+      const {email, password} = req.body;
+      const result = await userService.login(email, password);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async verifyUser(req, res, next) {
+    try {
+        const {email, otp} = req.body;
+        const isVerified = await VerificationService.verifyCode(email, otp);
+        if (!isVerified) throw new AppError('Invalid OTP or email');
+        userService.activeUser(email);
+        return ApiResponse.success(res,isVerified);
+    }
+    catch(err) {
+        next(err);
+    }
+  }
+
+  async forgotPassword(req, res, next) {
+    try {
+      const {email} = req.body;
+      const result = await userService.forgotPassword(email);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async verifyCodeForgotPassword(req, res, next) {
+    try{
+      const {email, otp} = req.body;
+      const isVerified = await VerificationService.verifyCode(email, otp);
+      if (!isVerified) throw new AppError('Invalid OTP');
+
+      const result = await userService.getTmpToken(email);
+      return ApiResponse.success(res,result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async changePassword(req, res, next) {
+    try{
+      const user = req.user;
+      const email = user.email;
+      const {password} = req.body; 
+      userService.changePassword(email, password);
+
+      return ApiResponse.success(res, 'Password has been updated');
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async getMyInfo(req, res, next) {
+    try{
+      const id = req.user.id;
+      const result = await userService.getMyInfo(id);
+
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+}
+
+export default new UserController();
