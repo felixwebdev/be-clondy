@@ -15,16 +15,6 @@ const userSchema = new mongoose.Schema({
     role: {type: String, enum: [ROLE_LISTS.ADMIN, ROLE_LISTS.USER], default: ROLE_LISTS.USER},
     location: {type: String, required: true},
     isVerified: {type: Boolean, default: false},
-    friends: [
-        {type: mongoose.Schema.Types.ObjectId, ref: "User"},
-    ],
-    friendRequests: [friendRequestSchema],
-    imageList: [
-        {type: mongoose.Schema.Types.ObjectId, ref: "Image"},
-    ],
-    chatRooms: [
-        {type: mongoose.Schema.Types.ObjectId, ref: "ChatRoom"},
-    ],
 }, { timestamps: true,});
 
 

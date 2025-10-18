@@ -6,9 +6,6 @@ const imageSchema = new mongoose.Schema({
     title: {type: String, trim: true},
     url: {type: String, required: true},
     createdAt: {type: Date, default: Date.now},
-    reports: [
-        {type: mongoose.Schema.Types.ObjectId, ref: "Report"}
-    ],
 });
 
 export default mongoose.model("Image", imageSchema);

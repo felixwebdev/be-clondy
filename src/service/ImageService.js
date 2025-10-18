@@ -32,10 +32,6 @@ class ImageService {
         url: result.secure_url,
       });
 
-      await User.findByIdAndUpdate(uploaderId, {
-        $push: { imageList: image._id },
-      });
-
       return {
         uploaderId,
         publicId: result.public_id,

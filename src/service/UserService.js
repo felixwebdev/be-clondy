@@ -87,6 +87,7 @@ class UserService {
       const user = await User.findOne({ email });
       if (!user) throw new AppError("User not found", 400);
 
+      await VerificationService.sendVerifyEmail(email);
       user.isVerified = true;
       await user.save();
     } catch (err) {
