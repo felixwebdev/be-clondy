@@ -92,6 +92,19 @@ class UserController {
       next(err);
     }
   }
+
+  async updateAvatar(req, res, next) {
+    try {
+      const filePath = req.file.path;
+      const uploaderId = req.user.id;
+
+      const result = await userService.updateAvatar(uploaderId, filePath);
+      return ApiResponse.success(res, result);
+    }
+    catch(err){
+      next(err);
+    }
+  }
 }
 
 export default new UserController();

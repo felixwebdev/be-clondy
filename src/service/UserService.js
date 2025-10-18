@@ -5,6 +5,8 @@ import VerificationService from "./VerificationService.js";
 import AppError from "../utils/AppError.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import ImageService from "./ImageService.js";
+import ApiResponse from "../utils/ApiResponse.js";
 
 dotenv.config();
 
@@ -45,7 +47,7 @@ class UserService {
         verified: newUser.isVerified,
       };
     } catch (err) {
-      throw new AppError("Error: " + err, 500);
+      throw new AppError(err, 500);
     }
   }
 
@@ -88,7 +90,7 @@ class UserService {
       user.isVerified = true;
       await user.save();
     } catch (err) {
-      throw new AppError("Error: " + err, 500);
+      throw new AppError(err, 500);
     }
   }
 
@@ -101,7 +103,7 @@ class UserService {
       user.isVerified = false;
       await user.save();
     } catch (err) {
-      throw new AppError("Error: " + err, 500);
+      throw new AppError(err, 500);
     }
   }
   // ---------------- CHANGE PASSWORD ----------------
@@ -114,7 +116,7 @@ class UserService {
 
       return await VerificationService.sendOTP(email);
     } catch (err) {
-      throw new AppError("Error: " + err);
+      throw new AppError(err);
     }
   }
   // ---------------- GET TMP TOKEN ----------------
@@ -140,9 +142,9 @@ class UserService {
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       user.password = hashedPassword;
-      user.save();
+      await user.save();
     } catch (err) {
-      throw new AppError("Error: " + err);
+      throw new AppError(err);
     }
   }
 
@@ -159,6 +161,23 @@ class UserService {
         location: user.location,
         avatar: user.avatar
       }
+    }
+    catch(err) {
+      throw new AppError(err);
+    }
+  }
+
+  // ---------------- Update Avatar -------------------
+  async updateAvatar(uploaderId, filePath) {
+    try {
+      const result = await ImageService.uploadImage(uploaderId, filePath);
+
+      const user = await User.findById(uploaderId);
+      
+      user.avatar = result.url;
+      await user.save();
+
+      return "Avatar updated";
     }
     catch(err) {
       throw new AppError(err);
