@@ -1,4 +1,4 @@
-import imageController from "../controller/ImageController.js";
+import imageController from "../controller/imageController.js";
 import multer from "multer";
 import verifyRoles from "../middleware/verifyRoles.js";
 import ROLE_LISTS from "../config/role_List.js";
