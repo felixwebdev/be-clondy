@@ -1,12 +1,6 @@
 import mongoose from "mongoose";
 import ROLE_LISTS from "../config/role_List.js";
 
-const friendRequestSchema = new mongoose.Schema({
-    senderId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-     status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
-    sentAt: { type: Date, default: Date.now }
-})
-
 const userSchema = new mongoose.Schema({
     email: {type: String, required: true, unique: true},
     username: {type: String, required: true},

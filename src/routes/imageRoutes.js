@@ -8,6 +8,7 @@ const upload = multer({dest: "tmp/"});
 const router = express.Router();
 
 router.route("/uploadImage").post(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER),upload.single("image"),imageController.uploadImage);
+router.route("/myImages").get(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER),imageController.getMyImages);
 router.route("/").get(imageController.index);
 
 export default router;

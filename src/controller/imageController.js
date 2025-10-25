@@ -19,6 +19,17 @@ class ImageController {
             next(err);
         }
     }
+
+    async getMyImages(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const images = await imageService.getMyImages(userId);
+            return ApiResponse.success(res, images);
+        }
+        catch(err) {
+            next(err);
+        }
+    }
 }
 
 export default new ImageController();

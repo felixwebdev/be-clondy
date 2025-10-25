@@ -42,6 +42,17 @@ class ImageService {
       throw new AppError(err);
     }
   }
+
+  async getMyImages(userId) {
+    const user = await User.findById(userId);
+    if (!user) throw new AppError("User not found", 404);
+
+    const images = await Image.find({ uploaderId: userId })
+    .sort({ createdAt: -1 })
+    .select("title url createdAt")
+    .lean();
+    return images;
+  }
 }
 
 export default new ImageService();
