@@ -19,7 +19,7 @@ app.use(cors());
 connectDB();
 
 router(app);
-const io = initSocket(server);
+initSocket(server);
 
 server.listen(PORT, ()=> {
      console.log(`Server listen from port http://localhost:${PORT}`);

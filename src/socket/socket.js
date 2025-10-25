@@ -1,28 +1,42 @@
 import { Server } from "socket.io";
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-let io;
+dotenv.config()
+const JWT_SECRET = process.env.ACCESS_TOKEN_SECRET;
+
+const userSocketMap = new Map();
+
+export let io;
 
 export const initSocket = (server) => {
   io = new Server(server,{ cors: {origin: "*"}});
 
-  io.on("connection", (socket) => {
-    console.log("New client connected:", socket.id);
+  io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    if (!token) return next(new Error("No token provided"));
 
-    socket.on("send_message", (data) => {
-      console.log("Message received:", data);
-      
-      io.emit("receive_message", data);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
-    });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    socket.userId = decoded.id; 
+    next();
+    } catch (err) {
+      next(new Error("Invalid token"));
+    }
   });
 
-  return io;
+  io.on("connection", (socket) => {
+    console.log("New client connected:" + socket.id + "with userId " + socket.userId);
+    userSocketMap.set(socket.userId, socket.id);
+
+    socket.on("disconnect", () => {
+      console.log("Client disconnected:", socket.userId);
+        userSocketMap.delete(socket.userId);
+    });
+  });
 };
 
-export const getIO = () => {
-  if (!io) throw new Error("Socket.IO not initialized!");
-  return io;
-};
+
+export function getSocketIdByUserId(userId) {
+  return userSocketMap.get(userId);
+}
