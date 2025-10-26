@@ -1,16 +1,55 @@
+import mongoose from "mongoose";
 import RELATION from "../config/relation_Status.js";
 import Relationship from "../models/Relationship.js";
 import User from "../models/User.js";
 import AppError from "../utils/AppError.js";
 
 class RelationshipService {
+    async getFriends() {
+        const listFriends = await Relationship.aggregate
+    }  
+
+    async getInfoFriend(userId) {
+        const user = await User.findById(userId);
+
+        if (!user) 
+            throw new AppError("User not found");
+
+        return {
+            id: user._id,
+            email: user.email,
+            username: user.username,
+            location: user.location,
+        }
+    } 
+
     async addFriend(senderId, receiverId) {
+        if (senderId == receiverId) 
+            throw new AppError("Sender and receiver cannot be the same")
+
         const sender = await User.findById(senderId);
         const receiver = await User.findById(receiverId);
 
         if (!sender || !receiver) 
             throw new AppError("Sender or Receiver not found");
+
+        const isExistRelation = await Relationship.findOne({senderId: senderId, receiverId: receiverId})
     
+        if (isExistRelation)
+        {
+            if (isExistRelation.status == RELATION.CANCELED) {
+                const res = await Relationship.findOneAndUpdate(
+                    { senderId: senderId, receiverId: receiverId, status: RELATION.CANCELED },
+                    { status: RELATION.PENDING },
+                    { new: true }
+                )
+                return res;
+            }
+            else {
+                throw new AppError("Request has been sent");
+            }
+        }
+
         const res = await Relationship.create({
             senderId: senderId,
             receiverId: receiverId,
@@ -26,8 +65,13 @@ class RelationshipService {
         if (!receiver || !sender) 
             throw new AppError("Sender or Receiver not found");
 
+        const isExistRelation = await Relationship.findOne({senderId: senderId, receiverId: receiverId, status: RELATION.PENDING})
+
+        if (!isExistRelation)
+            throw new AppError("Relationship is not exist");
+
         const relationship = await Relationship.findOneAndUpdate(
-            { senderId: senderId, receiverId: receiverId, status: RELATION.WAITING },
+            { senderId: senderId, receiverId: receiverId, status: RELATION.PENDING },
             { status: RELATION.ACCEPTED },
             { new: true }
         );
@@ -42,11 +86,21 @@ class RelationshipService {
         if (!user1 || !user2) 
             throw new AppError("Users not found");
 
+        const isExistRelation = await Relationship.findOne({
+             $or: [
+                    { senderId: userId1, receiverId: userId2, status: RELATION.ACCEPTED },
+                    { senderId: userId2, receiverId: userId1, status: RELATION.ACCEPTED }
+                ]
+        })
+
+        if (!isExistRelation)
+            throw new AppError("Relationship is not exist");
+
         const relationship = await Relationship.findOneAndUpdate(
             { 
                 $or: [
-                    { senderId: userId1, receiverId: userId2 },
-                    { senderId: userId2, receiverId: userId1 }
+                    { senderId: userId1, receiverId: userId2, status: RELATION.ACCEPTED },
+                    { senderId: userId2, receiverId: userId1, status: RELATION.ACCEPTED }
                 ]
             },
             { status: RELATION.CANCELED },

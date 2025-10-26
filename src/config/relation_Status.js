@@ -1,5 +1,5 @@
 const RELATION = {
-    WAITING: 'pending',
+    PENDING: 'pending',
     ACCEPTED: 'accepted',
     CANCELED: 'canceled',
 };

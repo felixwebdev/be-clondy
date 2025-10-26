@@ -20,11 +20,8 @@ class RelationshipController {
 
             const socketId = getSocketIdByUserId(receiverId);
 
-            io.to(socketId).emit("SendReqAddfriend", {
-                senderId: senderId,
-                receiverId: receiverId,
-                message: "You have a new friend request",
-            });
+            const sender = RelationshipService.getInfoFriend(senderId);
+            io.to(socketId).emit("SendReqAddfriend", sender);
 
             return ApiResponse.success(res, result);
         }
@@ -42,11 +39,9 @@ class RelationshipController {
             const result = await RelationshipService.acceptRequest(receiverId, senderId);
 
             const socketId = getSocketIdByUserId(senderId);
-            io.to(socketId).emit("AcceptReqAddfriend", {
-                senderId: senderId,
-                receiverId: receiverId,
-                message: "Your friend request has been accepted",
-            });
+
+            const receiver = RelationshipService.getInfoFriend(receiverId);
+            io.to(socketId).emit("AcceptReqAddfriend", receiver);
             return ApiResponse.success(res, result);
         }
         catch (err) {
