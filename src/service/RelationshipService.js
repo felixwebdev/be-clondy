@@ -5,8 +5,24 @@ import User from "../models/User.js";
 import AppError from "../utils/AppError.js";
 
 class RelationshipService {
-    async getFriends() {
-        const listFriends = await Relationship.aggregate
+    async getFriends(userId, _status) {
+        const relations = await Relationship.find({
+            status: _status,
+            $or: [
+                { senderId: userId },
+                { receiverId: userId },
+            ]
+            }).lean();
+
+        const friendIds = relations.map(r =>
+            String(r.senderId) === String(userId) ? r.receiverId : r.senderId
+        );
+
+        const friends = await User.find({ _id: { $in: friendIds } })
+            .select("username email avatar location")
+            .lean();
+
+        return friends;
     }  
 
     async getInfoFriend(userId) {

@@ -2,10 +2,43 @@ import AppError from "../utils/AppError.js";
 import RelationshipService from '../service/RelationshipService.js';
 import ApiResponse from "../utils/ApiResponse.js";
 import {io, getSocketIdByUserId} from "../socket/socket.js"
+import RELATION from "../config/relation_Status.js";
 
 class RelationshipController {
     index(req, res) {
         res.send("Index router relationship");
+    }
+
+    async getFriends(req, res, next) {
+        try {
+            const userId = req.user.id;
+
+            if (!userId)
+                throw new AppError("All fields are required");
+
+            const result = await RelationshipService.getFriends(userId, RELATION.ACCEPTED);
+          
+            return ApiResponse.success(res, result);
+        }
+        catch(err) {
+            next(err);
+        }
+    }
+
+    async getPendingFriends(req, res, next) {
+        try {
+            const userId = req.user.id;
+
+            if (!userId)
+                throw new AppError("All fields are required");
+
+            const result = await RelationshipService.getFriends(userId, RELATION.PENDING);
+          
+            return ApiResponse.success(res, result);
+        }
+        catch(err) {
+            next(err);
+        }
     }
 
     async addFriend(req, res, next) {
