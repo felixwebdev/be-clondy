@@ -3,6 +3,7 @@ import RELATION from "../config/relation_Status.js";
 import Relationship from "../models/Relationship.js";
 import User from "../models/User.js";
 import AppError from "../utils/AppError.js";
+import ChatRoomService from "./ChatRoomService.js"
 
 class RelationshipService {
     async getFriends(userId, _status) {
@@ -39,23 +40,23 @@ class RelationshipService {
         }
     } 
 
-    async addFriend(senderId, receiverId) {
-        if (senderId == receiverId) 
+    async addFriend(_senderId, _receiverId) {
+        if (_senderId == _receiverId) 
             throw new AppError("Sender and receiver cannot be the same")
-
-        const sender = await User.findById(senderId);
-        const receiver = await User.findById(receiverId);
+    
+        const sender = await User.exists({_id: _senderId});
+        const receiver = await User.exists({_id: _receiverId});
 
         if (!sender || !receiver) 
             throw new AppError("Sender or Receiver not found");
 
-        const isExistRelation = await Relationship.findOne({senderId: senderId, receiverId: receiverId})
+        const isExistRelation = await Relationship.findOne({senderId: _senderId, receiverId: _receiverId})
     
         if (isExistRelation)
         {
             if (isExistRelation.status == RELATION.CANCELED) {
                 const res = await Relationship.findOneAndUpdate(
-                    { senderId: senderId, receiverId: receiverId, status: RELATION.CANCELED },
+                    { senderId: _senderId, receiverId: _receiverId, status: RELATION.CANCELED },
                     { status: RELATION.PENDING },
                     { new: true }
                 )
@@ -75,8 +76,8 @@ class RelationshipService {
     }
 
     async acceptRequest(receiverId, senderId) {
-        const receiver = await User.findById(receiverId);
-        const sender = await User.findById(senderId);
+        const receiver = await User.exists({_id: receiverId});
+        const sender = await User.exists({_id: senderId});
 
         if (!receiver || !sender) 
             throw new AppError("Sender or Receiver not found");
@@ -85,6 +86,8 @@ class RelationshipService {
 
         if (!isExistRelation)
             throw new AppError("Relationship is not exist");
+
+        ChatRoomService.createChatRoom(senderId, receiverId);
 
         const relationship = await Relationship.findOneAndUpdate(
             { senderId: senderId, receiverId: receiverId, status: RELATION.PENDING },
@@ -96,8 +99,8 @@ class RelationshipService {
     }
 
     async cancelRequest(userId1, userId2) {
-        const user1 = await User.findById(userId1);
-        const user2 = await User.findById(userId2);
+        const user1 = await User.exists({_id: userId1});
+        const user2 = await User.exists({_id: userId2});
 
         if (!user1 || !user2) 
             throw new AppError("Users not found");
