@@ -5,7 +5,7 @@ import AppError from "../utils/AppError.js";
 class ChatRoomService {
     async createChatRoom(userId1, userId2) {
         if (!userId1 || !userId2) 
-            throw new AppError("All fields are request");
+            throw new AppError("All fields are required");
 
         const user1 = await User.exists({_id: userId1});
         const user2 = await User.exists({_id: userId2});
@@ -20,6 +20,27 @@ class ChatRoomService {
 
         return newChatRoom;
     }
+
+
+    async getAllChatRoom(userId) {
+        if (!userId) 
+            throw new AppError("All fields are required");
+
+        const user = await User.exists({_id: userId});
+
+        if (!user) 
+            throw new AppError("User not found");
+
+        const chatRooms = await ChatRoom.find({
+            $or: [
+                {userId1: userId},
+                {userId2: userId}
+            ]
+        })
+        return chatRooms;
+    }
+
+
 }   
 
 export default new ChatRoomService();

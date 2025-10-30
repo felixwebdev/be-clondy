@@ -4,6 +4,8 @@ const chatRoomSchema = new mongoose.Schema({
     userId1: {type: mongoose.Schema.Types.ObjectId, required: true, ref: "User"},
     userId2: {type: mongoose.Schema.Types.ObjectId, required: true, ref: "User"},
     lastMessageId: {type: mongoose.Schema.Types.ObjectId, ref: "Message"},
+    lastSenderId: {type: mongoose.Schema.Types.ObjectId, ref: "User"},
+    lastMessage: {type: String},
     lastMessageAt: {type: Date, default: Date.now}
 })
 
