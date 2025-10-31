@@ -12,15 +12,25 @@ class MessageService {
         const sender = await User.exists({_id: senderId});
 
         if (!chatRoom || !sender)
-            throw new AppError("ChatRoom or Sender is not exist");
+            throw new AppError("ChatRoom or Sender does not exist");
 
-        const result = await Message.create({
+        const message = await Message.create({
             chatRoomId,
             senderId,
             content
         })
 
-        return result;
+        const chatRoomUpdate = await ChatRoom.findByIdAndUpdate(chatRoomId,{
+            lastMessageId: message._id,
+            lastSenderId: senderId,
+            lastMessage: content,
+            lastMessageAt: new Date()
+        })
+
+        if (!message || !chatRoomUpdate) 
+            throw new AppError("Error when send message");
+
+        return message;
     }
 }
 
