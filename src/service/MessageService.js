@@ -6,7 +6,7 @@ import User from '../models/User.js';
 class MessageService {
     async sendMessage(chatRoomId, senderId, content) {
         if (!chatRoomId || !senderId || !content) 
-            throw new AppError("All fields are request");
+            throw new AppError("All fields are required");
 
         const chatRoom = await ChatRoom.exists({_id: chatRoomId});
         const sender = await User.exists({_id: senderId});
@@ -25,10 +25,12 @@ class MessageService {
             lastSenderId: senderId,
             lastMessage: content,
             lastMessageAt: new Date()
-        })
+        },
+        {new: true}
+        )
 
         if (!message || !chatRoomUpdate) 
-            throw new AppError("Error when send message");
+            throw new AppError("Failed to update chat room after sending message");
 
         return message;
     }
