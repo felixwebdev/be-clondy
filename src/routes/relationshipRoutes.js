@@ -12,6 +12,7 @@ router.route("/pending").post(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), re
 router.route("/accept").put(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), relationshipController.acceptRequest);
 router.route("/cancel").put(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), relationshipController.cancelRequest);
 router.route("/chat-room").get(verifyRoles(ROLE_LISTS.USER), chatRoomController.getAllChatRoom);
+router.route("/search").get(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), relationshipController.findFriend);
 router.route("/").get(relationshipController.index);
 
 export default router;

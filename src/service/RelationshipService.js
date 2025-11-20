@@ -26,6 +26,24 @@ class RelationshipService {
         return friends;
     }  
 
+   async findFriend(username) {
+        const users = await User.find({
+            username: { $regex: username, $options: 'i' }
+        });
+
+        if (!users || users.length === 0) {
+            throw new AppError("User not found");
+        }
+
+        return users.map(user => ({
+            id: user._id,
+            username: user.username,
+            avatar: user.avatar,
+            location: user.location
+        }));
+    }   
+
+
     async getInfoFriend(userId) {
         const user = await User.findById(userId);
 
@@ -34,7 +52,7 @@ class RelationshipService {
 
         return {
             id: user._id,
-            email: user.email,
+            avatar: user.avatar,
             username: user.username,
             location: user.location,
         }

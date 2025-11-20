@@ -25,6 +25,19 @@ class RelationshipController {
         }
     }
 
+    async findFriend(req, res, next) {
+        try {
+            const {username} = req.query;
+            if (!username)
+                throw new AppError("Username is required");
+            const result = await RelationshipService.findFriend(username);
+            return ApiResponse.success(res, result);
+        }  
+        catch(err) {
+            next(err);
+        }
+    }
+
     async getPendingFriends(req, res, next) {
         try {
             const userId = req.user.id;
