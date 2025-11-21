@@ -44,7 +44,14 @@ class ChatRoomService {
         return chatRooms;
     }
 
-
+    async getReceiverId(chatRoomId, senderId) {
+        const chatRoom = await ChatRoom.findById(chatRoomId);
+        if (chatRoom.userId1 == senderId) {
+            return chatRoom.userId2.toString();
+        } else {
+            return chatRoom.userId1.toString();
+        }
+    }
 }   
 
 export default new ChatRoomService();

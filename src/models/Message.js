@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const messageSchema = new mongoose.Schema({
    chatRoomId: {type: mongoose.Schema.Types.ObjectId, ref: "ChatRoom", required: true},
    senderId: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
-   content: {type: mongoose.Schema.Types.ObjectId},
+   content: {type: String},
    sendAt: {type: Date, default: Date.now}
 });
 

@@ -15,12 +15,16 @@ class messageController {
 
     async sendMessage(req, res, next) {
         try {
-            const { chatRoomId, senderId, content } = req.body;
+            const { chatRoomId, content } = req.body;
+            const senderId = req.user.id;
             const message = await MessageService.sendMessage(chatRoomId, senderId, content);
+            const receiverId = await ChatRoomService.getReceiverId(chatRoomId, senderId);
             if (message) {
-                const socketId = getSocketIdByUserId(senderId);
+                const socketId = getSocketIdByUserId(receiverId);
+                console.log("ReceiverId:", receiverId);
                 if (socketId) {
                     io.to(socketId).emit("newMessage", message);
+                    console.log("New message sent to socketId:", socketId);
                 }
                 return ApiResponse.success(res, message);
             }
