@@ -34,6 +34,13 @@ class MessageService {
 
         return message;
     }
+
+    async getMessagesByChatRoomId(chatRoomId) {
+        if (!chatRoomId) 
+            throw new AppError("ChatRoomId is required");
+        const messages = await Message.find({chatRoomId}).sort({createdAt: 1});
+        return messages;
+    }
 }
 
 export default new MessageService();

@@ -33,6 +33,16 @@ class messageController {
         }    
     }
 
+    async getMessagesByChatRoomId(req, res, next) {
+        try {
+            const { chatRoomId } = req.params;
+            const messages = await MessageService.getMessagesByChatRoomId(chatRoomId);
+            return ApiResponse.success(res, messages);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getAllChatRooms(req, res, next) {
         try {
             const userId  = req.user.id;
