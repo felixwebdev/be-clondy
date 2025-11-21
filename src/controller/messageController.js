@@ -1,0 +1,44 @@
+import MessageService from "../service/MessageService.js";
+import AppError from "../utils/AppError.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import { io, getSocketIdByUserId } from "../socket/socket.js";
+import ChatRoomService from "../service/ChatRoomService.js";
+
+class messageController {
+    async index(req, res, next) {
+        try {
+            return ApiResponse.success(res, "Message Controller is working");
+        } catch (error) {
+            next(error);
+        }  
+    }
+
+    async sendMessage(req, res, next) {
+        try {
+            const { chatRoomId, senderId, content } = req.body;
+            const message = await MessageService.sendMessage(chatRoomId, senderId, content);
+            if (message) {
+                const socketId = getSocketIdByUserId(senderId);
+                if (socketId) {
+                    io.to(socketId).emit("newMessage", message);
+                }
+                return ApiResponse.success(res, message);
+            }
+        } catch (error) {
+            next(error);
+        }    
+    }
+
+    async getAllChatRooms(req, res, next) {
+        try {
+            const userId  = req.user.id;
+            const chatRooms = await ChatRoomService.getAllChatRoom(userId);
+            return ApiResponse.success(res, chatRooms);
+        } catch (error) {
+            next(error);
+        }
+    }
+    
+}
+
+export default new messageController();

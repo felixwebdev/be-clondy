@@ -37,6 +37,10 @@ class ChatRoomService {
                 {userId2: userId}
             ]
         })
+
+        if (chatRooms.length === 0 )
+            throw new AppError("No chat rooms found for this user");
+
         return chatRooms;
     }
 
