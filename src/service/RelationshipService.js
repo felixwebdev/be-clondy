@@ -7,13 +7,19 @@ import ChatRoomService from "./ChatRoomService.js"
 
 class RelationshipService {
     async getFriends(userId, _status) {
-        const relations = await Relationship.find({
-            status: _status,
-            $or: [
-                { senderId: userId },
-                { receiverId: userId },
-            ]
-            }).lean();
+        // For PENDING status: only show requests where user is RECEIVER
+        // For ACCEPTED status: show both directions
+        const query = _status === RELATION.PENDING 
+            ? { status: _status, receiverId: userId }  // Only requests TO this user
+            : { 
+                status: _status,
+                $or: [
+                    { senderId: userId },
+                    { receiverId: userId },
+                ]
+            };
+
+        const relations = await Relationship.find(query).lean();
 
         const friendIds = relations.map(r =>
             String(r.senderId) === String(userId) ? r.receiverId : r.senderId
@@ -86,8 +92,8 @@ class RelationshipService {
         }
 
         const res = await Relationship.create({
-            senderId: senderId,
-            receiverId: receiverId,
+            senderId: _senderId,
+            receiverId: _receiverId,
         })
 
         return res;
