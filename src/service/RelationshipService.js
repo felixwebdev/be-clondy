@@ -68,7 +68,14 @@ class RelationshipService {
         if (!sender || !receiver) 
             throw new AppError("Sender or Receiver not found");
 
-        const isExistRelation = await Relationship.findOne({senderId: _senderId, receiverId: _receiverId})
+        const isExistRelation = await Relationship.findOne(
+            {
+                $or: [
+                    {senderId: _senderId, receiverId: _receiverId},
+                    {senderId: _receiverId, receiverId: _senderId}
+                ]
+            }
+        );
     
         if (isExistRelation)
         {
