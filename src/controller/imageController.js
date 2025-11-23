@@ -23,8 +23,29 @@ class ImageController {
     async getMyImages(req, res, next) {
         try {
             const userId = req.user.id;
-            const images = await imageService.getMyImages(userId);
-            return ApiResponse.success(res, images);
+            const result = await imageService.getMyImages(userId);
+            return ApiResponse.success(res, result);
+        }
+        catch(err) {
+            next(err);
+        }
+    }
+
+    async getAllImages(req, res, next) {
+        try {
+            const result = await imageService.getAllImages();
+            return ApiResponse.success(res, result);
+        }
+        catch(err) {
+            next(err);
+        }
+    }
+
+    async getFriendsImages(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const result = await imageService.getFriendsImages(userId);
+            return ApiResponse.success(res, result);
         }
         catch(err) {
             next(err);
