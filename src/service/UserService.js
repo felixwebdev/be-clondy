@@ -171,11 +171,23 @@ class UserService {
   // ---------------- Update Avatar -------------------
   async updateAvatar(uploaderId, filePath) {
     try {
-      const result = await ImageService.uploadImage(uploaderId, filePath);
-
-      const user = await User.findById(uploaderId);
+      // Import cloudinary and fs dynamically
+      const { v2: cloudinary } = await import('cloudinary');
+      const fs = await import('fs');
       
-      user.avatar = result.url;
+      // Upload directly to Cloudinary (avatars folder) without creating Image record
+      const result = await cloudinary.uploader.upload(filePath, {
+        folder: "clondy_api/avatars",
+      });
+
+      // Delete temp file after upload
+      fs.unlinkSync(filePath);
+
+      // Update user's avatar field
+      const user = await User.findById(uploaderId);
+      if (!user) throw new AppError("User not found", 404);
+      
+      user.avatar = result.secure_url;
       await user.save();
 
       return "Avatar updated";
