@@ -2,7 +2,9 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import Image from "../models/Image.js";
 import User from "../models/User.js";
+import Relationship from "../models/Relationship.js";
 import AppError from "../utils/AppError.js";
+import RELATION from "../config/relation_Status.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -54,24 +56,21 @@ class ImageService {
     return images;
   }
 
-  async getFriendsImages(userId) {
-    // Import Relationship model here to avoid circular dependency
-    const Relationship = (await import("../models/Relationship.js")).default;
-    
+  async getFriendsImages(userId) {    
     const user = await User.findById(userId);
     if (!user) throw new AppError("User not found", 404);
 
     // Get all friends (ACCEPTED relationships)
     const relationships = await Relationship.find({
       $or: [
-        { senderId: userId, status: "ACCEPTED" },
-        { receiverId: userId, status: "ACCEPTED" }
+        { senderId: userId, status:  RELATION.ACCEPTED },
+        { receiverId: userId, status: RELATION.ACCEPTED }
       ]
     }).lean();
 
     // Extract friend IDs
     const friendIds = relationships.map(rel => 
-      rel.senderId.toString() === userId.toString() 
+      rel.senderId == userId 
         ? rel.receiverId 
         : rel.senderId
     );
