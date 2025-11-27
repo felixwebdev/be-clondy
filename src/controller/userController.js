@@ -3,6 +3,7 @@ import userService from "../service/UserService.js";
 import VerificationService from "../service/VerificationService.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import AppError from "../utils/AppError.js";
+import REPORT_TYPE from "../config/report_Type.js";
 
 class UserController {
   index(req, res) {
@@ -102,6 +103,19 @@ class UserController {
       return ApiResponse.success(res, result);
     }
     catch(err){
+      next(err);
+    }
+  }
+
+  async sendReport(req, res, next) {
+    try {
+      const senderId = req.user.id;
+      const type = REPORT_TYPE.REPORT;
+      const {title, content} = req.body;
+      const result = await userService.sendReport(senderId, title, content, type);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
       next(err);
     }
   }

@@ -15,6 +15,7 @@ router.route("/verify").put(userController.verifyUser);
 router.route("/changePassword").put(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER),userController.changePassword);
 router.route("/myInfo").get(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), userController.getMyInfo);
 router.route("/updateAvatar").put(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), upload.single("image"),userController.updateAvatar);
+router.route("/sendReport").post(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), userController.sendReport);
 
 router.route("/").get(userController.index);
 export default router;

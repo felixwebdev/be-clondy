@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import ImageService from "./ImageService.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import Report from "../models/Report.js";
 
 dotenv.config();
 
@@ -195,6 +196,21 @@ class UserService {
     catch(err) {
       throw new AppError(err);
     }
+  }
+  // ---------------- Send Report -------------------
+  async sendReport(senderId, title, content, type) { 
+    try { 
+      const newReport = await Report.create({ 
+        senderId, 
+        title, 
+        content, 
+        type 
+      }); 
+        return newReport; 
+      } 
+    catch(err){ 
+      throw new AppError(err); 
+    } 
   }
 }
 
