@@ -1,6 +1,7 @@
 // services/UserService.js
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import Report from "../models/Report.js";
 import VerificationService from "./VerificationService.js";
 import AppError from "../utils/AppError.js";
 import dotenv from "dotenv";
@@ -52,10 +53,14 @@ class UserService {
   }
 
   // ---------------- LOGIN ----------------
-  async login(email, password) {
-    if (!email || !password) throw new AppError("All fields are required", 400);
+  async login(identifier, password) {
+    if (!identifier || !password) throw new AppError("All fields are required", 400);
 
-    const user = await User.findOne({ email });
+    // Find user by email OR username
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { username: identifier }]
+    });
+
     if (!user) throw new AppError("User not found", 400);
 
     const isValid = await bcrypt.compare(password, user.password);
@@ -72,6 +77,7 @@ class UserService {
 
     return {
       accessToken,
+      role: user.role,
       user: {
         id: user._id,
         email: user.email,
@@ -121,14 +127,14 @@ class UserService {
     }
   }
   // ---------------- GET TMP TOKEN ----------------
-  async getTmpToken(email){
+  async getTmpToken(email) {
     const user = await User.findOne({ email });
-    if (!user) 
+    if (!user)
       throw new AppError("User not found", 400);
 
     const accessToken = jwt.sign(
-      { id: user._id, email: user.email, role: user.role},
-        ACCESS_TOKEN_SECRET,
+      { id: user._id, email: user.email, role: user.role },
+      ACCESS_TOKEN_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRE }
     );
 
@@ -162,7 +168,7 @@ class UserService {
     try {
       const user = await User.findById(id);
       if (!user) throw new AppError("User not found", 400);
-      
+
       return {
         id: user._id,
         username: user.username,
@@ -171,7 +177,7 @@ class UserService {
         avatar: user.avatar
       }
     }
-    catch(err) {
+    catch (err) {
       throw new AppError(err);
     }
   }
@@ -197,13 +203,28 @@ class UserService {
     }
   }
 
+  // ---------------- Send Report -------------------
+  async sendReport(userId, title, content) {
+    try {
+      const report = await Report.create({
+        userId,
+        title: title.trim(),
+        content: content.trim(),
+      });
+
+      return "Report submitted successfully";
+    } catch (err) {
+      throw new AppError(err);
+    }
+  }
+
   // ---------------- Update Avatar -------------------
   async updateAvatar(uploaderId, filePath) {
     try {
       // Import cloudinary and fs dynamically
       const { v2: cloudinary } = await import('cloudinary');
       const fs = await import('fs');
-      
+
       // Upload directly to Cloudinary (avatars folder) without creating Image record
       const result = await cloudinary.uploader.upload(filePath, {
         folder: "clondy_api/avatars",
@@ -215,13 +236,13 @@ class UserService {
       // Update user's avatar field
       const user = await User.findById(uploaderId);
       if (!user) throw new AppError("User not found", 404);
-      
+
       user.avatar = result.secure_url;
       await user.save();
 
       return "Avatar updated";
     }
-    catch(err) {
+    catch (err) {
       throw new AppError(err);
     }
   }

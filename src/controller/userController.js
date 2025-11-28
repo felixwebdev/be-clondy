@@ -14,86 +14,89 @@ class UserController {
       const result = await userService.register(req.body);
       return ApiResponse.success(res, result);
     } catch (err) {
-      next(err); 
+      next(err);
     }
   }
 
   async login(req, res, next) {
     try {
-      const {email, password} = req.body;
-      const result = await userService.login(email, password);
+      // Allow login with either email or username
+      const { email, username, password } = req.body;
+      const identifier = email || username;
+
+      const result = await userService.login(identifier, password);
       return ApiResponse.success(res, result);
     }
-    catch(err) {
+    catch (err) {
       next(err);
     }
   }
 
   async verifyUser(req, res, next) {
     try {
-        const {email, otp} = req.body;
-        const isVerified = await VerificationService.verifyCode(email, otp);
-        if (!isVerified) throw new AppError('Invalid OTP or email');
-        userService.activeUser(email);
-        return ApiResponse.success(res,isVerified);
+      const { email, otp } = req.body;
+      const isVerified = await VerificationService.verifyCode(email, otp);
+      if (!isVerified) throw new AppError('Invalid OTP or email');
+      userService.activeUser(email);
+      return ApiResponse.success(res, isVerified);
     }
-    catch(err) {
-        next(err);
+    catch (err) {
+      next(err);
     }
   }
 
   async forgotPassword(req, res, next) {
     try {
-      const {email} = req.body;
+      const { email } = req.body;
       const result = await userService.forgotPassword(email);
       return ApiResponse.success(res, result);
     }
-    catch(err) {
+    catch (err) {
       next(err);
     }
   }
 
   async verifyCodeForgotPassword(req, res, next) {
-    try{
-      const {email, otp} = req.body;
+    try {
+      const { email, otp } = req.body;
       const isVerified = await VerificationService.verifyCode(email, otp);
       if (!isVerified) throw new AppError('Invalid OTP');
 
       const result = await userService.getTmpToken(email);
-      return ApiResponse.success(res,result);
+      return ApiResponse.success(res, result);
     }
-    catch(err) {
+    catch (err) {
       next(err);
     }
   }
 
   async changePassword(req, res, next) {
-    try{
+    try {
       const user = req.user;
       const email = user.email;
-      const {currentPassword, password} = req.body;
-      
+      const { currentPassword, password } = req.body;
+
       if (!password) {
         throw new AppError('New password is required', 400);
       }
-      
+
       await userService.changePassword(email, currentPassword, password);
 
       return ApiResponse.success(res, 'Password has been updated');
     }
-    catch(err) {
+    catch (err) {
       next(err);
     }
   }
 
   async getMyInfo(req, res, next) {
-    try{
+    try {
       const id = req.user.id;
       const result = await userService.getMyInfo(id);
 
       return ApiResponse.success(res, result);
     }
-    catch(err) {
+    catch (err) {
       next(err);
     }
   }
@@ -102,19 +105,36 @@ class UserController {
     try {
       const userId = req.user.id;
       const { newName, currentPassword } = req.body;
-      
+
       if (!newName) {
         throw new AppError('New name is required', 400);
       }
-      
+
       if (newName.trim().length < 2) {
         throw new AppError('Name must be at least 2 characters', 400);
       }
-      
+
       await userService.changeName(userId, newName, currentPassword);
       return ApiResponse.success(res, 'Name has been updated');
     }
-    catch(err) {
+    catch (err) {
+      next(err);
+    }
+  }
+
+  async sendReport(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const { title, content } = req.body;
+
+      if (!title || !content) {
+        throw new AppError('Title and content are required', 400);
+      }
+
+      const result = await userService.sendReport(userId, title, content);
+      return ApiResponse.success(res, result);
+    }
+    catch (err) {
       next(err);
     }
   }
@@ -127,7 +147,7 @@ class UserController {
       const result = await userService.updateAvatar(uploaderId, filePath);
       return ApiResponse.success(res, result);
     }
-    catch(err){
+    catch (err) {
       next(err);
     }
   }
