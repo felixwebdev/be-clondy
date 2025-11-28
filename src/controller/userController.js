@@ -71,8 +71,13 @@ class UserController {
     try{
       const user = req.user;
       const email = user.email;
-      const {password} = req.body; 
-      userService.changePassword(email, password);
+      const {currentPassword, password} = req.body;
+      
+      if (!password) {
+        throw new AppError('New password is required', 400);
+      }
+      
+      await userService.changePassword(email, currentPassword, password);
 
       return ApiResponse.success(res, 'Password has been updated');
     }
@@ -87,6 +92,27 @@ class UserController {
       const result = await userService.getMyInfo(id);
 
       return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async changeName(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const { newName, currentPassword } = req.body;
+      
+      if (!newName) {
+        throw new AppError('New name is required', 400);
+      }
+      
+      if (newName.trim().length < 2) {
+        throw new AppError('Name must be at least 2 characters', 400);
+      }
+      
+      await userService.changeName(userId, newName, currentPassword);
+      return ApiResponse.success(res, 'Name has been updated');
     }
     catch(err) {
       next(err);

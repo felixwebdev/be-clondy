@@ -13,6 +13,7 @@ router.route("/forgotPassword").post(userController.forgotPassword);
 router.route("/verifyChangePassword").post(userController.verifyCodeForgotPassword);
 router.route("/verify").put(userController.verifyUser);
 router.route("/changePassword").put(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER),userController.changePassword);
+router.route("/changeName").put(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER),userController.changeName);
 router.route("/myInfo").get(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), userController.getMyInfo);
 router.route("/updateAvatar").put(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), upload.single("image"),userController.updateAvatar);
 

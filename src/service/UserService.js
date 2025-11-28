@@ -136,10 +136,18 @@ class UserService {
   }
 
   // ---------------- CHANGE PASSWORD ----------------
-  async changePassword(email, newPassword) {
+  async changePassword(email, currentPassword, newPassword) {
     try {
       const user = await User.findOne({ email });
       if (!user) throw new AppError("User not found", 400);
+
+      // Verify current password if provided
+      if (currentPassword) {
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isPasswordValid) {
+          throw new AppError("Current password is incorrect", 400);
+        }
+      }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       user.password = hashedPassword;
@@ -164,6 +172,27 @@ class UserService {
       }
     }
     catch(err) {
+      throw new AppError(err);
+    }
+  }
+
+  // ---------------- Change Name -------------------
+  async changeName(userId, newName, currentPassword) {
+    try {
+      const user = await User.findById(userId);
+      if (!user) throw new AppError("User not found", 404);
+
+      // Verify current password if provided
+      if (currentPassword) {
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isPasswordValid) {
+          throw new AppError("Current password is incorrect", 400);
+        }
+      }
+
+      user.username = newName.trim();
+      await user.save();
+    } catch (err) {
       throw new AppError(err);
     }
   }
