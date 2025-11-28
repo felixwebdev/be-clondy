@@ -12,7 +12,7 @@ class AdminController {
       const result = await adminService.registerAdmin(req.body);
       return ApiResponse.success(res, result);
     }
-    catch(err) {
+    catch (err) {
       next(err);
     }
   }
@@ -22,7 +22,17 @@ class AdminController {
       const result = await adminService.getAllReports();
       return ApiResponse.success(res, result);
     }
-    catch(err) {
+    catch (err) {
+      next(err);
+    }
+  }
+
+  async getAllUsers(req, res, next) {
+    try {
+      const result = await adminService.getAllUsers();
+      return ApiResponse.success(res, result);
+    }
+    catch (err) {
       next(err);
     }
   }
@@ -30,15 +40,15 @@ class AdminController {
   async deleteReport(req, res, next) {
     try {
       const { id } = req.params;
-      
+
       if (!id) {
         throw new AppError('Report ID is required', 400);
       }
-      
+
       await adminService.deleteReport(id);
       return ApiResponse.success(res, 'Report deleted successfully');
     }
-    catch(err) {
+    catch (err) {
       next(err);
     }
   }

@@ -47,6 +47,29 @@ class AdminService {
     }
   }
 
+  // Get all users
+  async getAllUsers() {
+    try {
+      // Fetch all users except admins (optional: filter by role)
+      const users = await User.find({ role: ROLE_LISTS.USER })
+        .select("-password") // Exclude password
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return users.map(user => ({
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        location: user.location,
+        avatar: user.avatar,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt
+      }));
+    } catch (err) {
+      throw new AppError(err);
+    }
+  }
+
   // Get all reports with user info
   async getAllReports() {
     try {
@@ -75,7 +98,7 @@ class AdminService {
   async deleteReport(reportId) {
     try {
       const report = await Report.findById(reportId);
-      
+
       if (!report) {
         throw new AppError("Report not found", 404);
       }
