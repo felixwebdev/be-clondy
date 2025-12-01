@@ -119,6 +119,92 @@ class UserController {
       next(err);
     }
   }
+
+  async sendFeedback(req, res, next) {
+    try {
+      const senderId = req.user.id;
+      const type = REPORT_TYPE.SUGGESTION;
+      const {title, content} = req.body;
+      const result = await userService.sendReport(senderId, title, content, type);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async getAllReports(req, res, next) {
+    try {
+      const result = await userService.getAllReports();
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async adminRegister(req, res, next) {
+    try {
+      const result = await userService.adminRegister(req.body);
+      return ApiResponse.success(res, result);
+    } catch (err) {
+      next(err); 
+    }
+  }
+
+  async adminLogin(req, res, next) {
+    try {
+      const {email, password} = req.body;
+      const result = await userService.adminLogin(email, password);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async setAreaAdmin(req, res, next) {
+    try {
+      const {adminId, area} = req.body;
+      const result = await userService.setAreaAdmin(adminId, area);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async getAdmin(req, res, next) {
+    try {
+      const {adminId} = req.body;
+      const result = await userService.getAdmin(adminId);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+  async getUsersByLocation(req, res, next) {
+    try {
+      const {area} = req.body;
+      const result = await userService.getUsersByLocation(area);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async lockUser(req, res, next) {
+    try {
+      const {email} = req.body;
+      const result = await userService.lockUser(email);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
 }
 
 export default new UserController();

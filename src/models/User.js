@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     password: {type: String, required: true},
     avatar: {type: String, default: "https://res.cloudinary.com/desoarfu8/image/upload/v1759995051/images_ixruc3.png"},
     role: {type: String, enum: [ROLE_LISTS.ADMIN, ROLE_LISTS.USER], default: ROLE_LISTS.USER},
-    location: {type: String, required: true},
+    location: {type: String},
     isVerified: {type: Boolean, default: false},
 }, { timestamps: true,});
 

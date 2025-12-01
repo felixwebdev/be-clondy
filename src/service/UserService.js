@@ -8,6 +8,9 @@ import jwt from "jsonwebtoken";
 import ImageService from "./ImageService.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import Report from "../models/Report.js";
+import ROLE_LISTS from "../config/role_List.js";
+import { AREA, AREA_BY_REGION } from "../config/area.js";
+import Area from "../models/Area.js";
 
 dotenv.config();
 
@@ -212,6 +215,130 @@ class UserService {
       throw new AppError(err); 
     } 
   }
+
+  // ---------------- Get All Reports -------------------
+  async getAllReports() { 
+    try { 
+      const reports = await Report.find().populate('senderId', 'username email'); 
+      return reports; 
+    } 
+    catch(err){ 
+      throw new AppError(err); 
+    }
+  }
+
+  // ---------------- Admin Register ----------------
+  async adminRegister({ email, username, password}) {
+    try {
+      if (!email || !username || !password) {
+        throw new AppError("All fields are required", 400);
+      }
+      if (password.length < 8) {
+        throw new AppError("Password must be at least 8 characters", 400);
+      }
+      const existingUser = await User.findOne({ email, role: ROLE_LISTS.ADMIN });
+      if (existingUser) {
+        throw new AppError("Email already exists", 400);
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await User.create({
+        email,
+        username, 
+        password: hashedPassword,
+        role: ROLE_LISTS.ADMIN
+      });
+      await VerificationService.sendOTP(email);
+      return {
+        email: newUser.email,
+        username: newUser.username,
+        role: newUser.role,
+        verified: newUser.isVerified,
+      };
+    } catch (err) {
+      throw new AppError(err, 500);
+    }
+  }
+
+  // ---------------- Admin LOGIN ----------------
+  async adminLogin(email, password) {
+    if (!email || !password) throw new AppError("All fields are required", 400);
+    const user = await User.findOne({ email, role: ROLE_LISTS.ADMIN });
+    if (!user) throw new AppError("Admin not found", 400);
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) throw new AppError("Invalid password", 401);
+    if (!user.isVerified) throw new AppError("Admin was not verified");
+    //Access Token
+    const accessToken = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      ACCESS_TOKEN_SECRET,
+      { expiresIn: ACCESS_TOKEN_EXPIRE }
+    );
+    return {
+      accessToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        location: user.location,
+      },
+    };
+  }
+  // ---------------- Set Area Admin ----------------
+  async setAreaAdmin(adminId, area) {
+    try {
+      if (!adminId || !area) throw new Error("adminId and area is required");
+
+      if (!AREA_BY_REGION[area])
+        throw new Error("Invalid area region");
+
+      const newArea = await Area.create({
+        adminId,
+        areaManagement: AREA_BY_REGION[area]
+      });
+
+      return newArea;
+
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  // ---------------- Get Area Admin ----------------
+  async getAdmin(adminId){
+    try {
+      const admin = await User.findById(adminId);
+      if (!adminId) throw new Error("adminId not find");
+      const areaDoc = await Area.findOne({ adminId });
+      if (!areaDoc) throw new Error("adminDoc not find");
+      return {
+        admin: {
+          id: admin._id,
+          email: admin.email,
+          username: admin.username,
+          avatar: admin.avatar
+        },
+        area: areaDoc ? areaDoc.areaManagement : null
+      };
+    } catch (err) {
+      throw err;
+    }
+  }
+  // ---------------- Get Users By Location ----------------
+  async getUsersByLocation(area) {
+    if (!area) throw new Error("Area is required");
+    try {
+      const usersByLocation = await User.find({
+        location: area,
+        role: ROLE_LISTS.USER
+      });
+
+      return usersByLocation;
+    } catch (err) {
+      throw err;
+    }
+  }
+  
+
 }
 
 export default new UserService();
