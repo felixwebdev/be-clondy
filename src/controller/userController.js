@@ -143,6 +143,17 @@ class UserController {
     }
   }
 
+  async deleteReport(req, res, next) {
+    try {
+      const {reportId} = req.body;
+      const result = await userService.deleteReport(reportId);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
   async adminRegister(req, res, next) {
     try {
       const result = await userService.adminRegister(req.body);
@@ -174,16 +185,17 @@ class UserController {
     }
   }
 
-  async getAdmin(req, res, next) {
+  async getArea(req, res, next) {
     try {
-      const {adminId} = req.body;
-      const result = await userService.getAdmin(adminId);
+      const adminId = req.user.id; 
+      const result = await userService.getArea(adminId);
       return ApiResponse.success(res, result);
     }
     catch(err) {
       next(err);
-    }
+    } 
   }
+
   async getUsersByLocation(req, res, next) {
     try {
       const {area} = req.body;

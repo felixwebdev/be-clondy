@@ -219,13 +219,28 @@ class UserService {
   // ---------------- Get All Reports -------------------
   async getAllReports() { 
     try { 
-      const reports = await Report.find().populate('senderId', 'username email'); 
+      const reports = await Report.find()
+          .populate('senderId', 'username email')
       return reports; 
     } 
     catch(err){ 
       throw new AppError(err); 
     }
   }
+
+  // ---------------- Delete Report -------------------
+  async deleteReport(reportId) {
+    try {
+      const report = await Report.findById(reportId);
+      if (!report) throw new AppError("Report not found", 404);
+      await Report.findByIdAndDelete(reportId);
+      return "Report deleted";
+    }
+    catch(err) {
+      throw new AppError(err);
+    }
+  }
+  
 
   // ---------------- Admin Register ----------------
   async adminRegister({ email, username, password}) {
@@ -304,25 +319,18 @@ class UserService {
   }
 
   // ---------------- Get Area Admin ----------------
-  async getAdmin(adminId){
+  async getArea(adminId){
     try {
-      const admin = await User.findById(adminId);
-      if (!adminId) throw new Error("adminId not find");
       const areaDoc = await Area.findOne({ adminId });
       if (!areaDoc) throw new Error("adminDoc not find");
       return {
-        admin: {
-          id: admin._id,
-          email: admin.email,
-          username: admin.username,
-          avatar: admin.avatar
-        },
         area: areaDoc ? areaDoc.areaManagement : null
       };
     } catch (err) {
       throw err;
     }
   }
+
   // ---------------- Get Users By Location ----------------
   async getUsersByLocation(area) {
     if (!area) throw new Error("Area is required");

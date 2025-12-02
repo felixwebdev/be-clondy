@@ -22,10 +22,12 @@ router.route("/sendFeedback").post(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER
 router.route("/adminRegister").post(userController.adminRegister);
 router.route("/adminLogin").post(userController.adminLogin);
 router.route("/getAllReports").get(verifyRoles(ROLE_LISTS.ADMIN), userController.getAllReports);
+router.route("/deleteReport").delete(verifyRoles(ROLE_LISTS.ADMIN), userController.deleteReport);
 router.route("/setAreaAdmin").post(verifyRoles(ROLE_LISTS.ADMIN), userController.setAreaAdmin);
-router.route("/getAdmin").get(verifyRoles(ROLE_LISTS.ADMIN), userController.getAdmin);
+router.route("/getAdmin").get(verifyRoles(ROLE_LISTS.ADMIN), userController.getMyInfo);
+router.route("/getArea").get(verifyRoles(ROLE_LISTS.ADMIN), userController.getArea);
 router.route("/getUsersByLocation").get(verifyRoles(ROLE_LISTS.ADMIN), userController.getUsersByLocation);
 router.route("/disableUser").post(verifyRoles(ROLE_LISTS.ADMIN), userController.lockUser);
 
 router.route("/").get(userController.index);
-export default router;
+export default router; 
