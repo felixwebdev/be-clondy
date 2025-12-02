@@ -346,7 +346,44 @@ class UserService {
     }
   }
   
+  // ---------------- View Disabled Users ----------------
+  async viewDisabledUsers() {
+    try {
+      const disabledUsers = await User.find({
+        isVerified: false,
+        role: ROLE_LISTS.USER
+      });
+      return disabledUsers;
+    } catch (err) {
+      throw err;
+    }
+  }
 
+  // ---------------- Enable User ----------------
+  async enablekUser(email) {
+    try {
+      const user = await User.findOne({ email });
+      if (!user) throw new AppError("User not found", 400);
+      user.isVerified = true;
+      await user.save();
+      return "User enabled";
+    } catch (err) {
+      throw new AppError(err);
+    }
+  }
+
+  // ---------------- Change Name ----------------
+  async changeName(userId, newName) {
+    try {
+      const user = await User.findById(userId);
+      if (!user) throw new AppError("User not found", 400);
+      user.username = newName;
+      await user.save();
+      return "Name changed";
+    } catch (err) {
+      throw new AppError(err);
+    }
+  }
 }
 
 export default new UserService();

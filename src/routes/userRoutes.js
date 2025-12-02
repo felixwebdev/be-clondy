@@ -28,6 +28,9 @@ router.route("/getAdmin").get(verifyRoles(ROLE_LISTS.ADMIN), userController.getM
 router.route("/getArea").get(verifyRoles(ROLE_LISTS.ADMIN), userController.getArea);
 router.route("/getUsersByLocation").get(verifyRoles(ROLE_LISTS.ADMIN), userController.getUsersByLocation);
 router.route("/disableUser").post(verifyRoles(ROLE_LISTS.ADMIN), userController.lockUser);
+router.route("/viewDisabledUsers").get(verifyRoles(ROLE_LISTS.ADMIN), userController.viewDisabledUsers);
+router.route("/enableUser").post(verifyRoles(ROLE_LISTS.ADMIN), userController.enableUser);
+router.route("/changeName").put(verifyRoles(ROLE_LISTS.ADMIN, ROLE_LISTS.USER), userController.changeName);
 
 router.route("/").get(userController.index);
 export default router; 

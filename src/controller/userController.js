@@ -217,6 +217,39 @@ class UserController {
       next(err);
     }
   }
+
+  async viewDisabledUsers(req, res, next) {
+    try {
+      const result = await userService.viewDisabledUsers();
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async enableUser(req, res, next) {
+    try {
+      const {email} = req.body;
+      const result = await userService.enablekUser(email);
+      return ApiResponse.success(res, result);
+    }
+    catch(err) {
+      next(err);
+    }
+  }
+
+  async changeName(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const {newName} = req.body;
+      const result = await userService.changeName(userId, newName);
+      return ApiResponse.success(res, result);
+    } 
+    catch(err) {
+      next(err);
+    }
+  }
 }
 
 export default new UserController();
