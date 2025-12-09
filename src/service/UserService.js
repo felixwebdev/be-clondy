@@ -125,14 +125,14 @@ class UserService {
     }
   }
   // ---------------- GET TMP TOKEN ----------------
-  async getTmpToken(email){
+  async getTmpToken(email) {
     const user = await User.findOne({ email });
-    if (!user) 
+    if (!user)
       throw new AppError("User not found", 400);
 
     const accessToken = jwt.sign(
-      { id: user._id, email: user.email, role: user.role},
-        ACCESS_TOKEN_SECRET,
+      { id: user._id, email: user.email, role: user.role },
+      ACCESS_TOKEN_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRE }
     );
 
@@ -158,7 +158,7 @@ class UserService {
     try {
       const user = await User.findById(id);
       if (!user) throw new AppError("User not found", 400);
-      
+
       return {
         id: user._id,
         username: user.username,
@@ -167,7 +167,7 @@ class UserService {
         avatar: user.avatar
       }
     }
-    catch(err) {
+    catch (err) {
       throw new AppError(err);
     }
   }
@@ -178,7 +178,7 @@ class UserService {
       // Import cloudinary and fs dynamically
       const { v2: cloudinary } = await import('cloudinary');
       const fs = await import('fs');
-      
+
       // Upload directly to Cloudinary (avatars folder) without creating Image record
       const result = await cloudinary.uploader.upload(filePath, {
         folder: "clondy_api/avatars",
@@ -190,41 +190,41 @@ class UserService {
       // Update user's avatar field
       const user = await User.findById(uploaderId);
       if (!user) throw new AppError("User not found", 404);
-      
+
       user.avatar = result.secure_url;
       await user.save();
 
       return "Avatar updated";
     }
-    catch(err) {
+    catch (err) {
       throw new AppError(err);
     }
   }
   // ---------------- Send Report -------------------
-  async sendReport(senderId, title, content, type) { 
-    try { 
-      const newReport = await Report.create({ 
-        senderId, 
-        title, 
-        content, 
-        type 
-      }); 
-        return newReport; 
-      } 
-    catch(err){ 
-      throw new AppError(err); 
-    } 
+  async sendReport(senderId, title, content, type) {
+    try {
+      const newReport = await Report.create({
+        senderId,
+        title,
+        content,
+        type
+      });
+      return newReport;
+    }
+    catch (err) {
+      throw new AppError(err);
+    }
   }
 
   // ---------------- Get All Reports -------------------
-  async getAllReports() { 
-    try { 
+  async getAllReports() {
+    try {
       const reports = await Report.find()
-          .populate('senderId', 'username email')
-      return reports; 
-    } 
-    catch(err){ 
-      throw new AppError(err); 
+        .populate('senderId', 'username email')
+      return reports;
+    }
+    catch (err) {
+      throw new AppError(err);
     }
   }
 
@@ -236,14 +236,14 @@ class UserService {
       await Report.findByIdAndDelete(reportId);
       return "Report deleted";
     }
-    catch(err) {
+    catch (err) {
       throw new AppError(err);
     }
   }
-  
+
 
   // ---------------- Admin Register ----------------
-  async adminRegister({ email, username, password}) {
+  async adminRegister({ email, username, password }) {
     try {
       if (!email || !username || !password) {
         throw new AppError("All fields are required", 400);
@@ -258,7 +258,7 @@ class UserService {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await User.create({
         email,
-        username, 
+        username,
         password: hashedPassword,
         role: ROLE_LISTS.ADMIN
       });
@@ -319,7 +319,7 @@ class UserService {
   }
 
   // ---------------- Get Area Admin ----------------
-  async getArea(adminId){
+  async getArea(adminId) {
     try {
       const areaDoc = await Area.findOne({ adminId });
       if (!areaDoc) throw new Error("adminDoc not find");
@@ -345,7 +345,7 @@ class UserService {
       throw err;
     }
   }
-  
+
   // ---------------- View Disabled Users ----------------
   async viewDisabledUsers() {
     try {
