@@ -42,8 +42,10 @@ class UserService {
         location,
       });
 
-      await VerificationService.sendOTP(email);
-
+      const result = await VerificationService.sendOTP(email);
+      if (!result) {
+        throw new AppError("Failed to send OTP", 500);
+      }
       return {
         email: newUser.email,
         username: newUser.username,
