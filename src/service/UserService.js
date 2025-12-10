@@ -121,7 +121,9 @@ class UserService {
       const user = await User.findOne({ email });
       if (!user) throw new AppError("User not found", 400);
 
-      return await VerificationService.sendOTP(email);
+      const result = await VerificationService.sendOTP(email);
+
+      return result;
     } catch (err) {
       throw new AppError(err);
     }
