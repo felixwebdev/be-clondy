@@ -51,6 +51,18 @@ class ImageController {
             next(err);
         }
     }
+
+    async deleteImage(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const {imageId} = req.params;
+            const result = await imageService.deleteImage(userId, imageId);
+            return ApiResponse.success(res, result);
+        }
+        catch(err) {
+            next(err);
+        }
+    }
 }
 
 export default new ImageController();
