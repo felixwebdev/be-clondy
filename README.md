@@ -113,4 +113,4 @@ npm start
 
 ## License
 
-Dự án hiện chưa khai báo license cụ thể. Vui lòng thêm file `LICENSE` nếu cần chuẩn hóa.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
